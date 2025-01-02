@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/login_screen.dart';
-import 'screens/home_screen.dart';
+import 'login_screen.dart'; // Importation du fichier LoginScreen
 
 void main() {
   runApp(const MyApp());
@@ -14,14 +13,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Cinephoria mobile',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+        primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const LoginScreen(),
-        '/home': (context) => const HomeScreen(),
-      },
+      home: const LoginPage(), // Utilisation de la page de connexion ici
     );
   }
 }
