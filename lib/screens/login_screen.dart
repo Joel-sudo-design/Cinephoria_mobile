@@ -13,7 +13,7 @@ class LoginScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const TextField(
-              decoration: InputDecoration(labelText: "Nom d'utilisateur"),
+              decoration: InputDecoration(labelText: "Email"),
             ),
             const TextField(
               decoration: InputDecoration(labelText: "Mot de passe"),
