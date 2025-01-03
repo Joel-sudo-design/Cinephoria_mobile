@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'login_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -6,11 +7,49 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Page d'accueil")),
+      appBar: AppBar(
+        title: const Text(
+          "Cinéphoria",
+          style: TextStyle(
+            fontSize: 26,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: const Color(0xFF6A73AB),
+        centerTitle: true,
+        leading: IconButton(
+          icon: Transform.rotate(
+            angle: 3.14159,  // Rotation de 180 degrés pour inverser la flèche
+            child: const Icon(Icons.logout, color: Colors.white),
+          ),
+          iconSize: 30.0,
+          padding: const EdgeInsets.all(10.0),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const LoginPage()),  // Redirection vers la page de connexion
+            );
+          },
+        ),
+        toolbarHeight: kToolbarHeight + 20,
+      ),
       body: Center(
-        child: const Text(
-          "Bienvenue dans l'application Cinephoria !",
-          style: TextStyle(fontSize: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            const SizedBox(height: 20),
+            const Text(
+              "Commandes",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            // Autres éléments du body peuvent être ajoutés ici
+          ],
         ),
       ),
     );
