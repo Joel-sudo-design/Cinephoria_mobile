@@ -20,7 +20,7 @@ class HomeScreen extends StatelessWidget {
         centerTitle: true,
         leading: IconButton(
           icon: Transform.rotate(
-            angle: 3.14159,  // Rotation de 180 degrés pour inverser la flèche
+            angle: 3.14159,
             child: const Icon(Icons.logout, color: Colors.white),
           ),
           iconSize: 30.0,
@@ -28,7 +28,7 @@ class HomeScreen extends StatelessWidget {
           onPressed: () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const LoginPage()),  // Redirection vers la page de connexion
+              MaterialPageRoute(builder: (context) => const LoginPage()),
             );
           },
         ),
@@ -46,6 +46,14 @@ class HomeScreen extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
               textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            // Barre
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              height: 2, // Hauteur de la barre
+              width: double.infinity,
+              color: Colors.grey,
             ),
             const SizedBox(height: 20),
             // Autres éléments du body peuvent être ajoutés ici
