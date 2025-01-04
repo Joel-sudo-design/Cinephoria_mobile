@@ -42,7 +42,7 @@ class HomeScreen extends StatelessWidget {
             const Text(
               "Commandes",
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
               textAlign: TextAlign.center,
