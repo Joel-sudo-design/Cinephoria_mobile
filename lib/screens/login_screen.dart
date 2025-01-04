@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'home_screen.dart';
 
 class LoginPage extends StatefulWidget {
@@ -13,6 +12,8 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  bool _isButtonPressed = false; // Variable pour suivre l'état de l'appui sur le bouton
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +36,6 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                // Espacement au-dessus du logo
                 const SizedBox(height: 50),
 
                 // Logo
@@ -44,7 +44,6 @@ class _LoginPageState extends State<LoginPage> {
                   height: 150,
                 ),
 
-                // Espacement en dessous du logo
                 const SizedBox(height: 50),
 
                 // Formulaire
@@ -58,13 +57,13 @@ class _LoginPageState extends State<LoginPage> {
                         decoration: InputDecoration(
                           labelText: 'Email',
                           hintText: 'Entrer votre email',
-                          border: OutlineInputBorder(
+                          border: const OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.white),
                           ),
-                          focusedBorder: OutlineInputBorder(
+                          focusedBorder: const OutlineInputBorder(
                             borderSide: BorderSide(color: Color(0xFF7749F8)),
                           ),
-                          enabledBorder: OutlineInputBorder(
+                          enabledBorder: const OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.white),
                           ),
                           labelStyle: const TextStyle(color: Colors.white),
@@ -87,13 +86,13 @@ class _LoginPageState extends State<LoginPage> {
                         decoration: InputDecoration(
                           labelText: 'Mot de passe',
                           hintText: 'Entrer votre mot de passe',
-                          border: OutlineInputBorder(
+                          border: const OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.white),
                           ),
-                          focusedBorder: OutlineInputBorder(
+                          focusedBorder: const OutlineInputBorder(
                             borderSide: BorderSide(color: Color(0xFF7749F8)),
                           ),
-                          enabledBorder: OutlineInputBorder(
+                          enabledBorder: const OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.white),
                           ),
                           labelStyle: const TextStyle(color: Colors.white),
@@ -109,32 +108,49 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       const SizedBox(height: 30),
 
-                      // Login Button
+                      // Bouton Connexion
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.4,
                         child: TextButton(
                           onPressed: () {
                             if (_formKey.currentState?.validate() ?? false) {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const HomeScreen(),
-                                ),
-                              );
+                              setState(() {
+                                _isButtonPressed = true;
+                              });
+
+                              // Naviguer vers la page d'accueil après un délai ou une action
+                              Future.delayed(const Duration(seconds: 1), () {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const HomeScreen(),
+                                  ),
+                                );
+                              });
                             }
                           },
-                          style: TextButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            side: const BorderSide(color: Colors.white, width: 1),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.resolveWith<Color?>(
+                                  (states) => _isButtonPressed
+                                  ? Colors.white
+                                  : Colors.transparent,
                             ),
-                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            side: MaterialStateProperty.all(
+                              BorderSide(color: _isButtonPressed ? Color(0xFF6A73AB) : Colors.white, width: 1),
+                            ),
+                            shape: MaterialStateProperty.all(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
+                            padding: MaterialStateProperty.all(
+                              const EdgeInsets.symmetric(vertical: 10),
+                            ),
                           ),
-                          child: const Text(
+                          child: Text(
                             'CONNEXION',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: _isButtonPressed ? Color(0xFF6A73AB) : Colors.white,
                               fontSize: 16,
                             ),
                           ),
