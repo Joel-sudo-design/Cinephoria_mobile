@@ -1,4 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'home_screen.dart';
 
 class LoginPage extends StatefulWidget {
@@ -13,7 +16,58 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  bool _isButtonPressed = false; // Variable pour suivre l'état de l'appui sur le bouton
+  bool _isButtonPressed = false;
+  String _message = ''; // Message d'erreur ou de succès
+  bool _isError = false; // Indicateur pour savoir si c'est une erreur
+
+  // Instance de FlutterSecureStorage
+  final FlutterSecureStorage _storage = FlutterSecureStorage();
+
+  // Fonction pour envoyer la requête de connexion à l'API Symfony
+  Future<void> _login() async {
+    final String url = 'http://127.0.0.1:80/api/login';
+    final response = await http.post(
+      Uri.parse(url),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'email': _emailController.text,
+        'password': _passwordController.text,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      // Si la connexion est réussie, on récupère le token
+      final data = jsonDecode(response.body);
+      final token = data['token'];
+
+      // Stocker le token JWT localement avec Flutter Secure Storage
+      await _storage.write(key: 'jwt_token', value: token);
+
+      setState(() {
+        _message = 'Connexion réussie';
+        _isError = false;
+      });
+
+      // Naviguer vers la page d'accueil après un délai
+      Future.delayed(const Duration(seconds: 1), () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const HomeScreen(),
+          ),
+        );
+      });
+    } else {
+      // Si la connexion échoue, afficher un message d'erreur basé sur le code de l'API
+      final data = jsonDecode(response.body);
+      setState(() {
+        _message = data['error'] ?? 'Erreur inconnue';
+        _isError = true;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,13 +91,11 @@ class _LoginPageState extends State<LoginPage> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 const SizedBox(height: 50),
-
                 // Logo
                 Image.asset(
                   'assets/images/logo.png',
                   height: 150,
                 ),
-
                 const SizedBox(height: 50),
 
                 // Formulaire
@@ -51,7 +103,7 @@ class _LoginPageState extends State<LoginPage> {
                   key: _formKey,
                   child: Column(
                     children: <Widget>[
-                      // Email Field
+                      // Champ email
                       TextFormField(
                         controller: _emailController,
                         decoration: InputDecoration(
@@ -79,7 +131,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       const SizedBox(height: 20),
 
-                      // Password Field
+                      // Champ mot de passe
                       TextFormField(
                         controller: _passwordController,
                         obscureText: true,
@@ -118,15 +170,8 @@ class _LoginPageState extends State<LoginPage> {
                                 _isButtonPressed = true;
                               });
 
-                              // Naviguer vers la page d'accueil après un délai ou une action
-                              Future.delayed(const Duration(seconds: 1), () {
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const HomeScreen(),
-                                  ),
-                                );
-                              });
+                              // Appeler la fonction de connexion
+                              _login();
                             }
                           },
                           style: ButtonStyle(
@@ -156,6 +201,18 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                       ),
+                      const SizedBox(height: 20),
+
+                      // Affichage du message sous le champ
+                      if (_message.isNotEmpty) ...[
+                        Text(
+                          _message,
+                          style: TextStyle(
+                            color: _isError ? Colors.red : Colors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
