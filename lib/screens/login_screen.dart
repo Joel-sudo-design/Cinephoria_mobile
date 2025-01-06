@@ -19,13 +19,18 @@ class _LoginPageState extends State<LoginPage> {
   bool _isButtonPressed = false;
   String _message = ''; // Message d'erreur ou de succès
   bool _isError = false; // Indicateur pour savoir si c'est une erreur
+  bool _isLoading = false; // Indicateur de chargement
 
   // Instance de FlutterSecureStorage
   final FlutterSecureStorage _storage = FlutterSecureStorage();
 
   // Fonction pour envoyer la requête de connexion à l'API Symfony
   Future<void> _login() async {
-    final String url = 'http://127.0.0.1:80/api/login';
+    setState(() {
+      _isLoading = true; // Afficher le spinner lorsque la requête commence
+    });
+
+    final String url = 'http://192.168.1.13:80/api/login';
     final response = await http.post(
       Uri.parse(url),
       headers: <String, String>{
@@ -37,6 +42,11 @@ class _LoginPageState extends State<LoginPage> {
       }),
     );
 
+    setState(() {
+      _isLoading = false; // Masquer le spinner une fois la réponse reçue
+      _isButtonPressed = false; // Remettre le bouton à son état initial
+    });
+
     if (response.statusCode == 200) {
       // Si la connexion est réussie, on récupère le token
       final data = jsonDecode(response.body);
@@ -44,9 +54,9 @@ class _LoginPageState extends State<LoginPage> {
 
       // Stocker le token JWT localement avec Flutter Secure Storage
       await _storage.write(key: 'jwt_token', value: token);
+      print("Token JWT récupéré : $token"); // Vérifier que le token est bien récupéré
 
       setState(() {
-        _message = 'Connexion réussie';
         _isError = false;
       });
 
@@ -160,11 +170,13 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       const SizedBox(height: 30),
 
-                      // Bouton Connexion
+                      // Bouton Connexion ou Spinner
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.4,
                         child: TextButton(
-                          onPressed: () {
+                          onPressed: _isLoading
+                              ? null // Désactiver le bouton pendant le chargement
+                              : () {
                             if (_formKey.currentState?.validate() ?? false) {
                               setState(() {
                                 _isButtonPressed = true;
@@ -192,7 +204,11 @@ class _LoginPageState extends State<LoginPage> {
                               const EdgeInsets.symmetric(vertical: 10),
                             ),
                           ),
-                          child: Text(
+                          child: _isLoading
+                              ? const CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF6A73AB)),
+                          )
+                              : Text(
                             'CONNEXION',
                             style: TextStyle(
                               color: _isButtonPressed ? Color(0xFF6A73AB) : Colors.white,
