@@ -16,11 +16,9 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoading = true;
   List<dynamic> _commandes = [];
 
-  // Fonction pour récupérer les commandes depuis l'API
   Future<void> _fetchCommandes() async {
     final String? token = await _storage.read(key: 'jwt_token');
     if (token == null) {
-      // Si aucun token n'est trouvé, rediriger l'utilisateur vers la page de login
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const LoginPage()),
@@ -28,19 +26,17 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-    // Vérification du token dans la console
     print("Token JWT envoyé : $token");
 
     final response = await http.get(
-      Uri.parse('http://192.168.1.13:80/commandes'),
+      Uri.parse('http://192.168.1.13:80/api/commande'),
       headers: {
-        'Authorization': 'Bearer $token', // Ajout du token JWT dans l'en-tête
+        'Authorization': 'Bearer $token',
       },
     );
 
     if (response.statusCode == 200) {
       try {
-        print('Réponse brute: ${response.body}'); // Affiche la réponse brute
         final data = jsonDecode(response.body);
         setState(() {
           _commandes = data;
@@ -67,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchCommandes(); // Appeler la fonction pour récupérer les commandes
+    _fetchCommandes();
   }
 
   @override
@@ -115,12 +111,11 @@ class _HomeScreenState extends State<HomeScreen> {
           // Barre
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 20),
-            height: 2, // Hauteur de la barre
+            height: 2,
             width: double.infinity,
             color: Colors.grey,
           ),
           const SizedBox(height: 20),
-          // Si le chargement est en cours
           _isLoading
               ? Expanded(
             child: Center(

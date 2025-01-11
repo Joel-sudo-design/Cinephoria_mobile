@@ -17,9 +17,9 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
 
   bool _isButtonPressed = false;
-  String _message = ''; // Message d'erreur ou de succès
-  bool _isError = false; // Indicateur pour savoir si c'est une erreur
-  bool _isLoading = false; // Indicateur de chargement
+  String _message = '';
+  bool _isError = false;
+  bool _isLoading = false;
 
   // Instance de FlutterSecureStorage
   final FlutterSecureStorage _storage = FlutterSecureStorage();
@@ -27,55 +27,66 @@ class _LoginPageState extends State<LoginPage> {
   // Fonction pour envoyer la requête de connexion à l'API Symfony
   Future<void> _login() async {
     setState(() {
-      _isLoading = true; // Afficher le spinner lorsque la requête commence
+      _isLoading = true;
     });
 
     final String url = 'http://192.168.1.13:80/api/login';
-    final response = await http.post(
-      Uri.parse(url),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'email': _emailController.text,
-        'password': _passwordController.text,
-      }),
-    );
-
-    setState(() {
-      _isLoading = false; // Masquer le spinner une fois la réponse reçue
-      _isButtonPressed = false; // Remettre le bouton à son état initial
+    final body = jsonEncode({
+      'email': _emailController.text,
+      'password': _passwordController.text,
     });
 
-    if (response.statusCode == 200) {
-      // Si la connexion est réussie, on récupère le token
-      final data = jsonDecode(response.body);
-      final token = data['token'];
-
-      // Stocker le token JWT localement avec Flutter Secure Storage
-      await _storage.write(key: 'jwt_token', value: token);
-      print("Token JWT récupéré : $token"); // Vérifier que le token est bien récupéré
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      );
 
       setState(() {
-        _isError = false;
+        _isLoading = false;
+        _isButtonPressed = false;
       });
 
-      // Naviguer vers la page d'accueil après un délai
-      Future.delayed(const Duration(seconds: 1), () {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const HomeScreen(),
-          ),
-        );
-      });
-    } else {
-      // Si la connexion échoue, afficher un message d'erreur basé sur le code de l'API
-      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data.containsKey('token')) {
+          final token = data['token'];
+
+          await _storage.write(key: 'jwt_token', value: token);
+
+          setState(() {
+            _isError = false;
+          });
+
+          Future.delayed(const Duration(seconds: 1), () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const HomeScreen(),
+              ),
+            );
+          });
+        } else {
+          setState(() {
+            _isError = true;
+            _message = "Erreur : Pas de token dans la réponse.";
+          });
+        }
+      } else {
+        final data = jsonDecode(response.body);
+        setState(() {
+          _isError = true;
+          _message = data['error'] ?? 'Erreur inconnue';
+        });
+      }
+    } catch (e) {
       setState(() {
-        _message = data['error'] ?? 'Erreur inconnue';
+        _isLoading = false;
         _isError = true;
+        _message = "Erreur de connexion : $e";
       });
+      print("Erreur lors de la requête : $e");
     }
   }
 
@@ -193,7 +204,11 @@ class _LoginPageState extends State<LoginPage> {
                                   : Colors.transparent,
                             ),
                             side: MaterialStateProperty.all(
-                              BorderSide(color: _isButtonPressed ? Color(0xFF6A73AB) : Colors.white, width: 1),
+                              BorderSide(
+                                  color: _isButtonPressed
+                                      ? const Color(0xFF6A73AB)
+                                      : Colors.white,
+                                  width: 1),
                             ),
                             shape: MaterialStateProperty.all(
                               RoundedRectangleBorder(
@@ -206,12 +221,15 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           child: _isLoading
                               ? const CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF6A73AB)),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                Color(0xFF6A73AB)),
                           )
                               : Text(
                             'CONNEXION',
                             style: TextStyle(
-                              color: _isButtonPressed ? Color(0xFF6A73AB) : Colors.white,
+                              color: _isButtonPressed
+                                  ? const Color(0xFF6A73AB)
+                                  : Colors.white,
                               fontSize: 16,
                             ),
                           ),
