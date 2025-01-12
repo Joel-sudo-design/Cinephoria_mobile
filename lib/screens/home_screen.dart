@@ -17,7 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<dynamic> _commandes = [];
 
   Future<void> _fetchCommandes() async {
-    final String? token = await _storage.read(key: 'jwt_token');
+    final String? token = await _storage.read(key: 'token');
     if (token == null) {
       Navigator.pushReplacement(
         context,
@@ -25,8 +25,6 @@ class _HomeScreenState extends State<HomeScreen> {
       );
       return;
     }
-
-    print("Token JWT envoyé : $token");
 
     final response = await http.get(
       Uri.parse('http://192.168.1.13:80/api/commande'),

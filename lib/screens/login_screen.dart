@@ -15,16 +15,14 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final FlutterSecureStorage _storage = FlutterSecureStorage();
 
   bool _isButtonPressed = false;
   String _message = '';
   bool _isError = false;
   bool _isLoading = false;
+  bool _obscurePassword = true;
 
-  // Instance de FlutterSecureStorage
-  final FlutterSecureStorage _storage = FlutterSecureStorage();
-
-  // Fonction pour envoyer la requête de connexion à l'API Symfony
   Future<void> _login() async {
     setState(() {
       _isLoading = true;
@@ -53,7 +51,7 @@ class _LoginPageState extends State<LoginPage> {
         if (data.containsKey('token')) {
           final token = data['token'];
 
-          await _storage.write(key: 'jwt_token', value: token);
+          await _storage.write(key: 'token', value: token);
 
           setState(() {
             _isError = false;
@@ -152,10 +150,10 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       const SizedBox(height: 20),
 
-                      // Champ mot de passe
+                      // Champ mot de passe avec icône œil
                       TextFormField(
                         controller: _passwordController,
-                        obscureText: true,
+                        obscureText: _obscurePassword, // Utilisez la variable d'état ici
                         decoration: InputDecoration(
                           labelText: 'Mot de passe',
                           hintText: 'Entrer votre mot de passe',
@@ -170,6 +168,19 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           labelStyle: const TextStyle(color: Colors.white),
                           hintStyle: const TextStyle(color: Colors.white),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              // Choisissez l'icône en fonction de l'état
+                              _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                              color: Colors.white,
+                            ),
+                            onPressed: () {
+                              // Basculez l'état de la visibilité du mot de passe
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
+                          ),
                         ),
                         style: const TextStyle(color: Colors.white),
                         validator: (value) {
