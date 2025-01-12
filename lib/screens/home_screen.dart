@@ -1,67 +1,21 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'login_screen.dart';
+import 'package:cinephoria_mobile/services/commande_service.dart';
+import 'package:cinephoria_mobile/models/commande.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+class HomeScreen extends StatelessWidget {
+  HomeScreen({Key? key}) : super(key: key);
 
-  @override
-  _HomeScreenState createState() => _HomeScreenState();
-}
+  final CommandeService _commandeService = CommandeService();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
-class _HomeScreenState extends State<HomeScreen> {
-  final FlutterSecureStorage _storage = FlutterSecureStorage();
-  bool _isLoading = true;
-  List<dynamic> _commandes = [];
-
-  Future<void> _fetchCommandes() async {
-    final String? token = await _storage.read(key: 'token');
-    if (token == null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginPage()),
-      );
-      return;
-    }
-
-    final response = await http.get(
-      Uri.parse('http://192.168.1.13:80/api/commande'),
-      headers: {
-        'Authorization': 'Bearer $token',
-      },
+  Future<void> _logout(BuildContext context) async {
+    await _storage.delete(key: 'token');
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginPage()),
     );
-
-    if (response.statusCode == 200) {
-      try {
-        final data = jsonDecode(response.body);
-        setState(() {
-          _commandes = data;
-          _isLoading = false;
-        });
-      } catch (e) {
-        setState(() {
-          _isLoading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur de format des données')),
-        );
-      }
-    } else {
-      setState(() {
-        _isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur lors de la récupération des commandes')),
-      );
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchCommandes();
   }
 
   @override
@@ -85,12 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           iconSize: 30.0,
           padding: const EdgeInsets.all(10.0),
-          onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const LoginPage()),
-            );
-          },
+          onPressed: () => _logout(context),
         ),
         toolbarHeight: kToolbarHeight + 20,
       ),
@@ -106,7 +55,6 @@ class _HomeScreenState extends State<HomeScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 20),
-          // Barre
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 20),
             height: 2,
@@ -114,25 +62,120 @@ class _HomeScreenState extends State<HomeScreen> {
             color: Colors.grey,
           ),
           const SizedBox(height: 20),
-          _isLoading
-              ? Expanded(
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
-          )
-              : Expanded(
-            child: ListView.builder(
-              itemCount: _commandes.length,
-              itemBuilder: (context, index) {
-                final commande = _commandes[index];
-                return ListTile(
-                  title: Text(commande['film']),
-                  subtitle: Text(
-                    'Date: ${commande['date']} - Salle: ${commande['salle']}',
-                  ),
-                  leading: Image.network(commande['image'] ?? ''),
-                  trailing: Text('Sieges: ${commande['sieges_reserves']}'),
-                );
+          Expanded(
+            child: FutureBuilder<List<Commande>>(
+              future: _commandeService.fetchCommandes(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(
+                    child: Text(
+                      'Erreur : ${snapshot.error}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  );
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text('Aucune commande trouvée.'));
+                } else {
+                  final commandes = snapshot.data!;
+
+                  return ListView.builder(
+                    itemCount: commandes.length,
+                    itemBuilder: (context, index) {
+                      final commande = commandes[index];
+
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        elevation: 4,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Image en haut
+                            ClipRRect(
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(8),
+                                topRight: Radius.circular(8),
+                              ),
+                              child: Image.network(
+                                // Remplacez localhost -> IP si besoin
+                                commande.image,
+                                fit: BoxFit.cover,
+                                height: 180,
+                                width: double.infinity,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return SizedBox(
+                                    height: 180,
+                                    child: Center(
+                                      child: Icon(
+                                        Icons.image_not_supported,
+                                        color: Colors.grey[400],
+                                        size: 50,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            // Contenu en dessous
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Nom du film
+                                  Text(
+                                    commande.film,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  // Cinéma
+                                  Text(
+                                    'Cinéma : ${commande.cinema}',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  // Date et salle
+                                  Text(
+                                    'Date : ${commande.date}   |   Salle : ${commande.salle}',
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  // Heures de début et de fin
+                                  Text(
+                                    'Heure : ${commande.heureDebut} - ${commande.heureFin}',
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  // Sièges réservés
+                                  Text(
+                                    'Sièges : ${commande.siegesReserves}',
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                }
               },
             ),
           ),

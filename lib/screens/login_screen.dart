@@ -10,30 +10,25 @@ class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
 }
-
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final FlutterSecureStorage _storage = FlutterSecureStorage();
-
   bool _isButtonPressed = false;
   String _message = '';
   bool _isError = false;
   bool _isLoading = false;
   bool _obscurePassword = true;
-
   Future<void> _login() async {
     setState(() {
       _isLoading = true;
     });
-
     final String url = 'http://192.168.1.13:80/api/login';
     final body = jsonEncode({
       'email': _emailController.text,
       'password': _passwordController.text,
     });
-
     try {
       final response = await http.post(
         Uri.parse(url),
@@ -45,7 +40,6 @@ class _LoginPageState extends State<LoginPage> {
         _isLoading = false;
         _isButtonPressed = false;
       });
-
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data.containsKey('token')) {
@@ -56,12 +50,11 @@ class _LoginPageState extends State<LoginPage> {
           setState(() {
             _isError = false;
           });
-
           Future.delayed(const Duration(seconds: 1), () {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => const HomeScreen(),
+                builder: (context) => HomeScreen(),
               ),
             );
           });
@@ -87,7 +80,6 @@ class _LoginPageState extends State<LoginPage> {
       print("Erreur lors de la requête : $e");
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -116,8 +108,6 @@ class _LoginPageState extends State<LoginPage> {
                   height: 150,
                 ),
                 const SizedBox(height: 50),
-
-                // Formulaire
                 Form(
                   key: _formKey,
                   child: Column(
@@ -187,8 +177,6 @@ class _LoginPageState extends State<LoginPage> {
                         },
                       ),
                       const SizedBox(height: 30),
-
-                      // Bouton Connexion ou Spinner
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.4,
                         child: TextButton(
@@ -199,8 +187,6 @@ class _LoginPageState extends State<LoginPage> {
                               setState(() {
                                 _isButtonPressed = true;
                               });
-
-                              // Appeler la fonction de connexion
                               _login();
                             }
                           },
@@ -243,8 +229,6 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                       const SizedBox(height: 20),
-
-                      // Affichage du message sous le champ
                       if (_message.isNotEmpty) ...[
                         Text(
                           _message,
