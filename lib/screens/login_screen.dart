@@ -149,11 +149,9 @@ class _LoginPageState extends State<LoginPage> {
                         },
                       ),
                       const SizedBox(height: 20),
-
-                      // Champ mot de passe avec icône œil
                       TextFormField(
                         controller: _passwordController,
-                        obscureText: _obscurePassword, // Utilisez la variable d'état ici
+                        obscureText: _obscurePassword,
                         decoration: InputDecoration(
                           labelText: 'Mot de passe',
                           hintText: 'Entrer votre mot de passe',
@@ -170,12 +168,10 @@ class _LoginPageState extends State<LoginPage> {
                           hintStyle: const TextStyle(color: Colors.white),
                           suffixIcon: IconButton(
                             icon: Icon(
-                              // Choisissez l'icône en fonction de l'état
                               _obscurePassword ? Icons.visibility_off : Icons.visibility,
                               color: Colors.white,
                             ),
                             onPressed: () {
-                              // Basculez l'état de la visibilité du mot de passe
                               setState(() {
                                 _obscurePassword = !_obscurePassword;
                               });
