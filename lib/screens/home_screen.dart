@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'login_screen.dart';
 import 'package:cinephoria_mobile/services/commande_service.dart';
 import 'package:cinephoria_mobile/models/commande.dart';
+import 'package:cinephoria_mobile/screens/QrCodeScreen.dart';
 
 class HomeScreen extends StatelessWidget {
   HomeScreen({Key? key}) : super(key: key);
@@ -38,7 +39,6 @@ class HomeScreen extends StatelessWidget {
             child: const Icon(Icons.logout, color: Colors.white),
           ),
           iconSize: 30.0,
-          padding: const EdgeInsets.all(10.0),
           onPressed: () => _logout(context),
         ),
         toolbarHeight: kToolbarHeight + 20,
@@ -86,91 +86,95 @@ class HomeScreen extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final commande = commandes[index];
 
-                      return Card(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        elevation: 4,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Image en haut
-                            ClipRRect(
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(8),
-                                topRight: Radius.circular(8),
+                      // On détecte le clic sur la Card
+                      return InkWell(
+                        onTap: () {
+                          // On ouvre l'écran du QR code
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => QrCodeScreen(commande: commande),
+                            ),
+                          );
+                        },
+                        child: Card(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          elevation: 4,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Image en haut
+                              ClipRRect(
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(8),
+                                  topRight: Radius.circular(8),
+                                ),
+                                child: Image.network(
+                                  commande.image,
+                                  fit: BoxFit.cover,
+                                  height: 180,
+                                  width: double.infinity,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return SizedBox(
+                                      height: 180,
+                                      child: Center(
+                                        child: Icon(
+                                          Icons.image_not_supported,
+                                          color: Colors.grey[400],
+                                          size: 50,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
-                              child: Image.network(
-                                // Remplacez localhost -> IP si besoin
-                                commande.image,
-                                fit: BoxFit.cover,
-                                height: 180,
-                                width: double.infinity,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return SizedBox(
-                                    height: 180,
-                                    child: Center(
-                                      child: Icon(
-                                        Icons.image_not_supported,
-                                        color: Colors.grey[400],
-                                        size: 50,
+                              // Contenu
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      commande.film,
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                  );
-                                },
-                              ),
-                            ),
-                            // Contenu en dessous
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 12,
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Nom du film
-                                  Text(
-                                    commande.film,
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Cinéma : ${commande.cinema}',
+                                      style: const TextStyle(fontSize: 16),
                                     ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  // Cinéma
-                                  Text(
-                                    'Cinéma : ${commande.cinema}',
-                                    style: const TextStyle(
-                                      fontSize: 16,
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Date : ${commande.date} | Salle : ${commande.salle}',
+                                      style: const TextStyle(fontSize: 16),
                                     ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  // Date et salle
-                                  Text(
-                                    'Date : ${commande.date}   |   Salle : ${commande.salle}',
-                                    style: const TextStyle(fontSize: 16),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  // Heures de début et de fin
-                                  Text(
-                                    'Heure : ${commande.heureDebut} - ${commande.heureFin}',
-                                    style: const TextStyle(fontSize: 16),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  // Sièges réservés
-                                  Text(
-                                    'Sièges : ${commande.siegesReserves}',
-                                    style: const TextStyle(fontSize: 16),
-                                  ),
-                                ],
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Heure : ${commande.heureDebut} - ${commande.heureFin}',
+                                      style: const TextStyle(fontSize: 16),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Sièges : ${commande.siegesReserves}',
+                                      style: const TextStyle(fontSize: 16),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       );
                     },
