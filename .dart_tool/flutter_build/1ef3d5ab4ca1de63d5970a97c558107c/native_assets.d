@@ -1,0 +1,1 @@
+ C:\\Users\\joeld\\AndroidStudioProjects\\cinephoria_mobile\\.dart_tool\\flutter_build\\1ef3d5ab4ca1de63d5970a97c558107c\\native_assets.yaml: 
