@@ -5,7 +5,7 @@ import 'package:cinephoria_mobile/models/commande.dart';
 
 class CommandeService {
   final _storage = const FlutterSecureStorage();
-  static const String baseUrl = 'http://192.168.1.13:80/api';
+  static const String baseUrl = 'https://cinephoria.joeldermont.fr/api';
 
   Future<List<Commande>> fetchCommandes() async {
     final String? token = await _storage.read(key: 'token');

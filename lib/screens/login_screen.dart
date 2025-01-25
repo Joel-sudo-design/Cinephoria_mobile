@@ -24,7 +24,7 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       _isLoading = true;
     });
-    final String url = 'http://192.168.1.13:80/api/login';
+    final String url = 'https://cinephoria.joeldermont.fr/api/login';
     final body = jsonEncode({
       'email': _emailController.text,
       'password': _passwordController.text,
