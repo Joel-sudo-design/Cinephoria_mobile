@@ -29,8 +29,8 @@ void main() {
 
     // Appeler la méthode testLogin
     final result = await LoginPage.testLogin(
-      email: 'joeldermont@gmail.com',
-      password: 'w3rNbR!@28',
+      email: 'email@example.com',
+      password: 'motdepasse',
       client: mockHttpClient,
     );
 
