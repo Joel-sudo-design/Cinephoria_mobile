@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -7,9 +8,35 @@ import 'home_screen.dart';
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
+  // Méthode pour les tests unitaires
+  static Future<Map<String, dynamic>> testLogin({
+    required String email,
+    required String password,
+    required http.Client client,
+  }) async {
+    final String url = 'https://cinephoria.joeldermont.fr/api/login';
+    final body = jsonEncode({
+      'email': email,
+      'password': password,
+    });
+
+    final response = await client.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: body,
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Erreur : ${response.body}');
+    }
+  }
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
+
 class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
