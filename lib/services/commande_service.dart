@@ -29,6 +29,8 @@ class CommandeService {
         throw Exception('Données reçues non conformes');
       }
     } else {
+      print('Status: ${response.statusCode}');
+      print('Body: ${response.body}');
       throw Exception('Erreur lors de la récupération des commandes');
     }
   }
