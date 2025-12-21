@@ -6,4 +6,8 @@ Application mobile pour le site Cinéphoria.
 
 ![Aperçu de l'application](aperçu.png)
 
+![Aperçu de l'application](aperçu2.png)
+
+![Aperçu de l'application](aperçu3.png)
+
 
