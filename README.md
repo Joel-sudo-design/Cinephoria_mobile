@@ -1,4 +1,4 @@
-# cinephoria_mobile
+# Cinephoria mobile
 
 Application mobile pour le site Cinéphoria.
 
