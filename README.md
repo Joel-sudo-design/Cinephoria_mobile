@@ -4,10 +4,10 @@ Application mobile pour le site Cinéphoria.
 
 ## Aperçu
 
-![Aperçu de l'application](aperçu.png)
+![Aperçu de l'application](login.png)
 
-![Aperçu de l'application](aperçu2.png)
+![Aperçu de l'application](commandes.png)
 
-![Aperçu de l'application](aperçu3.png)
+![Aperçu de l'application](qrcode.png)
 
 
